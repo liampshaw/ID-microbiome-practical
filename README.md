@@ -17,7 +17,7 @@ doi: [10.1038/s41396-019-0392-1](https://doi.org/10.1038/s41396-019-0392-1)
 
 The aim of this study was to see how the gut microbiome recovers after a course of antibiotics. Palleja et al. gave twelve healthy male adults a four-day course of three antibiotics: meropenem, gentamicin and vancomycin. This mix was ingested once-daily via apple juice. The particular combination of antibiotics was chosen as '*a modified version of prophylactic antibiotic protocols from intensive care units*'. This would therefore be expected to significantly deplete the gut microbiome. 
 
-![**The study design.**](data/palleja-study-design.png){#id .class width=50% height=50%}
+![**The study design.**](data/palleja-study-design.png)
 
 Palleja et al. then collected faecal samples before (D0), after (D4), and at three further time points after treatment: 8 days (D8), 42 days (D42), 180 days (D180). Samples were analysed with shotgun metagenomics. 
 
