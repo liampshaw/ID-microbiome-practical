@@ -566,6 +566,7 @@ ggplot(mOTUs.long.format.bifidobacterium, aes(day, value, group=patient, fill=pa
 * As its name suggests, it is apparently able to colonise the oral cavity as well, perhaps suggesting a different enviromental niche. 
 </details>
 
+<br>
 These different patterns from shotgun metagenomics could form the basis of future experimental studies. For example, if you were a probiotic manufacturer you might want to market *B. bifidum* yoghurt to give to people post-antibiotic treatment to restore their gut microbiome. A lot more evidence would be required before you could conclude that this was the case though!
 
 
@@ -580,6 +581,8 @@ To sum up, we have been able to:
 * Perform exploratory analyses which could suggest further
 
 The commands used should all be quite portable and flexible. If you're interested, I encourage you to try them for yourself with variations. For example: why restrict to the *Bifidobacterium* genus? There are other genera - pick some and use the commands in the last section to look at abundances over time. One thing we did not look at is the abundances of individual *genes*. This is more complex as the number of genes is far larger than the number of mOTUs. However, the same principles apply, and Palleja et al. made this data available as well. 
+
+**Other R packages for microbiome data**
 
 Finally, some packages we did not look at in this tutorial but are worth mentioning:
 
