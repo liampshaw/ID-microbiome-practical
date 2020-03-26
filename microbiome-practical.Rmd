@@ -12,6 +12,14 @@ output:
     number_sections: true
 ---
 
+
+***
+**About this document:** *This is an Rmarkdown notebook which includes `code` as well as explanation. It can be used to generate a html document which can be viewed in a browser. From this, you should be able to copy and paste the code into RStudio and run it yourself if you have cloned the github repository. You can also open the underlying `.Rmd` document in RStudio and edit it yourself, and run the code chunks.*
+
+***
+
+# Introduction 
+
 In this practical, you will learn how to use R to analyse microbiome data. The intention is to give a grounding in the basics while also thinking about some interesting science. 
 
 By the end of the practical, you should be able to: 
@@ -35,37 +43,32 @@ Palleja et al. then collected faecal samples before (D0), after (D4), and at thr
 
 We will explore this microbiome dataset using some R commands. Let's get started!
 
-**About this document:** This is an Rmarkdown notebook which includes `code` as well as explanation. It can be used to generate a html document which can be viewed in a browser. From this, you should be able to copy and paste the code into RStudio and run it yourself if you have cloned the github repository. You can also open the underlying `.Rmd` document in RStudio and edit it yourself, and run the code chunks.  
-
 # Reading in microbiome data
 
 First, we will load in some R packages. These contain useful functions which supplement the basic R functions. If you do not have these, you will have to install them with e.g. `install.packages('vegan')`. 
 
 ```{r libraries, message=FALSE}
-require(vegan) # Community ecology package, containing tools for diversity analysis, ordination and analysis of dissimilarities
-require(ggplot2) # Plotting package
-require(Matrix) # Matrix classes and methods
-require(reshape2) # Reformating datasets
+library(vegan) # Community ecology package, containing tools for diversity analysis, ordination and analysis of dissimilarities
+library(ggplot2) # Plotting package
+library(Matrix) # Matrix classes and methods
+library(reshape2) # Reformatting datasets
 ```
 
 This practical assumes some level of familiarity with R and is not an introduction to the R programming language. However, it contains a reasonable amount of explanation about what the lines of code are doing, so even if you have never seen R code before it should make some sense. 
 
-We will read in the species abundance data as provided by Palleja et al. Before doing so, it's worth understanding what their methods were for reaching these species abundances. 
+We will read in the : **m**etagenomic **O**perational **T**axonomic **U**nits (mOTU) abundance data as provided by Palleja et al. Before doing so, it's worth understanding what their methods were for reaching these mOTU abundances. 
 
-Throughout this practical, there are <span style="background-color:#EFD31C">questions</span> about the material. Click on **Show answer** to reveal the answer - but do consider  having a go at thinking about it first!
+Throughout this practical, there are <span style="background-color:#EFD31C">questions</span> about the material. Click on **Show answer** to reveal the answer - but do have a go at thinking about it first!
 
 <br>
 <span style="background-color:#EFD31C">
-**Question:** From the paper, how were operational taxonomic unit (OTU) abundances calculated? What is the advantage of this method compared to 16S rRNA marker gene screening? 
+**Question:** From the paper, how were mOTU abundances calculated? What is the advantage of this method compared to 16S rRNA marker gene screening? 
 </span>
 <details>
   <summary>**Show answer**</summary>
-  <span style="background-color:#fff18c">
 
 * From the paper: 'Screened high-quality reads were aligned (alignment length cut-off of 45 bp and minimum 97% sequence identity for the option 'screen') to a database consisting of 10 universal single-copy marker genes extracted from 3,496 NCBI reference genomes and 263 metagenomes'. 
-* The advantage of this method is that it uses multiple genes rather than a single marker gene (such as the 16S rRNA gene) so is more reliable for species differentiation. 
-
-</span>
+* The advantage of this method is that it uses multiple genes rather than a single marker gene (such as the 16S rRNA gene) so is more reliable for differentiating closely-related mOTUs.
 </details>
 
 <br>
@@ -76,15 +79,13 @@ In the lecture, we talked about rarefying microbiome data. This is the process o
 </span>
 <details>
   <summary>**Show answer**</summary>
-<span style="background-color:#fff18c">
 
-* Ensuring the same sequencing depth in each sample matters if you want to calculate diversity in a consistent way across samples. However, rarefying removes information on variance of species counts between samples. 
-* Palleja et al. write that 'Samples were rarefied to 14 million inserts'. This means that each sample had 14 million paired-end reads (2 x 100 base pairs). In practice, this is very large compared to a lot of microbiome datasets and so rarefying is less of an issue here (apart from for very low abundance species).
-</span>
+* Ensuring the same sequencing depth in each sample matters if you want to calculate diversity in a consistent way across samples. However, rarefying removes information on variance of mOTU counts between samples. 
+* Palleja et al. write that 'Samples were rarefied to 14 million inserts'. This means that each sample had 14 million paired-end reads (2 x 100 base pairs). In practice, this is very large compared to a lot of microbiome datasets and so rarefying is less of an issue here (apart from for very low abundance mOTUs).
 </details>
 
 <br>
-We now read in the dataset. 
+We now read in the dataset of mOTUs.
 
 ```{r mOTUs}
 mOTUs <- read.csv('data/annotated.mOTU.rel_abund.rarefied.tsv',
@@ -113,6 +114,7 @@ head(colnames(mOTUs))
 </span>
 <details>
   <summary>**Show answer**</summary>
+  
 `head(colnames(mOTUs), n=10)`
 </details>
 
@@ -123,28 +125,34 @@ Now, let's look at rownames:
 head(rownames(mOTUs))
 ```
 
-These are bacterial species.
+These are bacterial mOTUs.
 
-So, we have a dataset where columns are samples and rows are bacterial species: an 'OTU table' like in the lecture. The entries are relative abundances for each species within a sample, which means that the sum of each column is 1 (total relative abundance within a sample is 1 by definition). We can check this.
+So, we have a dataset where columns are samples and rows are bacterial mOTU: an 'OTU table' like in the lecture. The entries are relative abundances for each mOTU within a sample, which means that the sum of each column is 1 (total relative abundance within a sample is 1 by definition). We can check this.
 
 ```{r column_sums}
 head(colSums(mOTUs))
 ```
 
-If we look at the dataset in more detail, we can inspect the relative abundances for individual species.
+If we look at the dataset in more detail, we can inspect the relative abundances for individual mOTUs.
 
 ```{r inspect_dataset}
 head(mOTUs[,c("ERAS3_D0","ERAS3_D4")])
 ```
 
-Here, `mOTUs[,c("ERAS3_Dag0","ERAS3_Dag4")]` selected two columns of the dataset from patient ERAS3. We then see that e.g. the species *Actinomyces odontolyticus* was present at a relative abundance of 0.0003927314 (=0.39%) on day 4 but was not present in the sample from day 0. 
+Here, `mOTUs[,c("ERAS3_Dag0","ERAS3_Dag4")]` selected two columns of the dataset from patient ERAS3. We then see that e.g. the mOTU *Actinomyces odontolyticus* was present at a relative abundance of 0.0003927314 (=0.39%) on day 4 but was not present in the sample from day 0. 
 
 <span style="background-color:#EFD31C">
-**Question:** What is the smallest possible number of sequencing inserts (paired-end reads) from a species that would mean it could be present in the dataset (the 'limit-of-detection' or 'detection threshold')?
+**Question:** What is the smallest possible number of sequencing inserts (paired-end reads) from a mOTU that would mean it could be present in the dataset (the 'limit-of-detection' or 'detection threshold')?
 </span>
 <details>
   <summary>**Show answer**</summary>
-Any species detected must have at least 1 insert. 14 million inserts in total would mean that any species detected must be at an abundance of 1 in 14 million which is ~ 0.000007%. This is a lower bound. Note from the paper that 'at least 11.9 million read-pairs were mapped to IGC [integrated gene catalog of gut microbial genes]', so Palleja et al. write it would be 'on the order of 1 in 10 million'. This is quite low for a microbiome study; for example, with only 10,000 reads per sample (common in 16S rRNA gene studies) you would have a detection threshold of (1/10,000 * 100)% = 0.1%.  
+
+* Any mOTU detected must have at least 1 insert. 
+* 14 million inserts in each sample.
+* So any mOTU detected must be at an abundance of 1 in 14 million which is ~ 0.000007%.
+* This is a lower bound: the true values will be greater than this (for example, if 10 marker genes then could need at least 10 inserts to cover them, and in reality multiple inserts per gene) 
+* Note from the paper that 'at least 11.9 million read-pairs were mapped to IGC [integrated gene catalog of gut microbial genes]', so Palleja et al. write it would be 'on the order of 1 in 10 million'. 
+* This is quite low for a microbiome study; for example, with only 10,000 reads per sample (common in 16S rRNA gene studies) you would have a detection threshold of (1/10,000 * 100)% = 0.1%.  
 </details>
 
 
@@ -158,7 +166,7 @@ We can use nonmetric multidimensional scaling (NMDS) to give a visualization of 
 mds.df <- data.frame(metaMDS(t(mOTUs), distance="bray")$points)
 ```
 
-`metaMDS` runs non-metric multidimensional scaling on the dataset. We use `t(mOTUs)` which 'transposes' the dataset to swap rows and columns, as `metaMDS` expects the data in this format. `$points` selects just the output we want, which gives `MDS1` and `MDS2` coordinates for each sample (x and y position). We have used the Bray-Curtis dissimilarity index specified with `bray`. Annoyingly, this is specified with a `distance` argument in the function. 
+`metaMDS` runs non-metric multidimensional scaling on the dataset. We use `t(mOTUs)` which 'transposes' the dataset to swap rows and columns, as `metaMDS` expects the data in this format. `$points` selects just the output we want, which gives `MDS1` and `MDS2` coordinates for each sample (x and y position). We have used the Bray-Curtis dissimilarity index specified with `bray`. Annoyingly, this is specified with a `distance` argument in the function...
 
 <span style="background-color:#EFD31C">
 **Question:** Why is this annoying?
@@ -168,6 +176,7 @@ mds.df <- data.frame(metaMDS(t(mOTUs), distance="bray")$points)
 The Bray-Curtis index *b* doesn't satisfy the triangle inequality, so is a **dissimilarity** not a true distance! 
 </details>
 
+<br>
 ```{r head_MDS}
 head(mds.df)
 ```
@@ -190,18 +199,19 @@ mds.df$day <- gsub(".*_", "",rownames(mds.df))
 * `day`: The pattern `.*_` means *everything which precedes any occurrence of the _ character*. So this will delete '_' and everything **before** it e.g. `ERAS1_D0` -> `D0`
 </details>
 
+<br>
 Note that it's optional to actually write out the arguments in `gsub` - the second usage I didn't bother. Linebreaks are also optional, they just help readability. 
 
-We now use ``ggplot` to visualise the dataset. Each point is one sample. 
+We now use ``ggplot` to visualise the dataset. `ggplot` (from `ggplot2` package) is a very powerful plotting tool. The concept is to specify the *aesthetics* of the plot (`aes`) and then add layers (such as `geom_point`) which will use those aesthetics. So here, we want the x and y axis to be `MDS1` and `MDS2`, the colour to be the `day`, and to plot points.
 
 ```{r plot_MDS, message=FALSE}
-ggplot(mds.df, aes(MDS1, MDS2, colour=day))+
-        geom_point(size=4)+
-        theme_bw()+
-  coord_fixed()
+ggplot(mds.df, aes(x=MDS1, y=MDS2, colour=day))+ # Aesthetics of plot
+  geom_point(size=4)+ # Plot points of size 4 (easier to see)
+  theme_bw()+ # Black and white plot theme (default is grey)
+  coord_fixed() # Ratio of 1:1 between x and y axes
 ```
 
-You might notice that the order of the days seems wrong in the legend. R has ordered them lexicographically. We can reorder them:
+So, each point on this is one sample. You might notice that the order of the days seems wrong in the legend. R has ordered them lexicographically (alphabetically + numbers). We can reorder them with the `ordered` command:
 
 ```{r reorder_days}
 mds.df$day <- ordered(mds.df$day,
@@ -233,7 +243,7 @@ Samples cluster by day, suggesting a dramatic effect of the antibiotics on the g
 
 Above we used the Bray-Curtis dissimilarity with NMDS, which tries to represent the dataset in 2 dimensions by arranging points so that there is minimum 'stress' i.e. they reflect their higher-dimensional distances as well as possible.
 
-But we have many other choices. For example, principal components analysis (PCA) is common in microbiome studies. PCA has a different approach, where it finds the directions of greatest variation in the dataset and returns them in order: so PC1 is the axis made up of linear combinations of species abundances which captures the greatest variation, PC2 the second-greatest variation, and so on. 
+But we have many other choices. For example, principal components analysis (PCA) is common in microbiome studies. PCA has a different approach, where it finds the directions of greatest variation in the dataset and returns them in order: so PC1 is the axis made up of linear combinations of relative abundances which captures the greatest variation, PC2 the second-greatest variation, and so on. 
 
 The below code performs and plots the first two principal components of the dataset. 
 
@@ -259,14 +269,20 @@ ggplot(pca.df, aes(PC1, PC2, colour=day))+
 ```
 
 <span style="background-color:#EFD31C">
-**Question:** Why is this plot so different to the NMDS?
+**Question:** Why do you think this plot is so different to the NMDS plot?
 </span>
 <details>
   <summary>**Show answer**</summary>
-PCA finds the directions of greatest variation in the dataset. Here, the greatest variation is that immediately after antibiotics (D4) the gut microbiome is very different to all other timepoints. So that dominates the first two principal components and is shown in the visualization. Also, D4 samples can be very different to each other. This shows us that distances between points in NMDS are not necessarily indicative of fixed relationships between sets of samples. 
+
+* PCA finds the directions of greatest variation in the dataset. 
+* Here, the greatest variation is immediately after antibiotics: at D4 the gut microbiome is very different to all other timepoints. 
+* So that dominates the first two principal components and is shown in the visualization, with all other more 'normal' samples clustered together. 
+* D4 samples can also be very different to each other. 
+* This also highlights that distances between points in NMDS are not necessarily indicative of fixed relationships between sets of samples e.g. distance between D0 and D4 in NMDS plots 'is'looks' about the same as distance between D4 and D8, but this is slightly misleading. 
 </details>
 
-You should recall from the lecture that **an ordination is not a statistical test**. But here it is very clear that there is something to investigate further: from PCA we see very clearly that the gut microbiome is very perturbed at D4; from NMDS we see that it eventually returns to a similar state as baseline. (In the paper itself, they use a principal coordinates analysis or PCoA - which despite its name leads to a more similar plot to NMDS than PCA - there really are a huge number of choices here!)
+<br>
+You should recall from the lecture that **an ordination is not a statistical test**. But here it is very clear that there is something to investigate further: from PCA we see very clearly that the gut microbiome is very perturbed at D4; from NMDS we see that it eventually returns to a similar state as baseline. (In the paper itself, Palleja et al. use a principal coordinates analysis or PCoA - which despite its name leads to a more similar plot to NMDS than PCA - there really are a huge number of choices here!)
 
 We will now investigate this change more quantitatively. 
 
@@ -276,14 +292,18 @@ We will now investigate this change more quantitatively.
 One quantitative thing we can investigate is diversity indices. Two popular ones are richness and the Shannon index. 
 
 ## Richness
-<br>
+
+Richness is the number of observed mOTUs in a sample.  
+
 ```{r richness}
 richness <- apply(mOTUs, FUN=nnzero, MARGIN=2)
 ```
 
-The `apply` function is a useful R trick. It applies a function over a matrix or dataframe. The function here is `nnzero`, which counts the number of non-zero entries in a vector. `MARGIN=2` means we want to apply this over the columns of the dataset (`MARGIN=1` would mean the rows; I remember the order by thinking of the Parthenon, which is 'a row of columns'). So this piece of code will count how many non-zero entries are in each column i.e. how many species have non-zero abundance in each sample. 
+The `apply` function is a useful R trick. It applies a function over a matrix or dataframe. The function here is `nnzero`, which counts the number of non-zero entries in a vector. `MARGIN=2` means we want to apply this over the columns of the dataset (`MARGIN=1` would mean the rows; I remember the order by thinking of the Parthenon, which is 'a row of columns'). So this piece of code will count how many non-zero entries are in each column i.e. how many mOTUs have non-zero abundance in each sample. 
 
 ## Shannon index 
+
+The Shannon index takes into account relative abundance, not just presence/absence. 
 
 ```{r shannon}
 shannon <- diversity(t(mOTUs), index = "shannon")
@@ -292,13 +312,14 @@ shannon <- diversity(t(mOTUs), index = "shannon")
 The `diversity` function is from the `vegan` package. We have specified the `shannon` index. 
 
 <span style="background-color:#EFD31C">
-**Question**: Find the definition of the Shannon index. What is the Shannon index of a sample with two species present at equal abundance?
+**Question**: Find the definition of the Shannon index. What is the Shannon index of a sample with two mOTUs present at equal abundance?
 </span>
 <details>
   <summary>**Show answer**</summary>
-Shannon index H = -sum(p_i log(p_i)) where p_i is proportional abundance of species i. (You can find this either on Wikipedia, or in the documentation for the `diversity` function which you can access with `?diversity`.)
 
-Two species present at equal abundance in a sample means each has abundance p_1 = p_2 = 0.5. So it is
+* Shannon index H = -sum(p_i log(p_i)) where p_i is proportional abundance of mOTU i. (You can find this either on Wikipedia, or in the documentation for the `diversity` function which you can access with `?diversity`.)
+* Two mOTU present at equal abundance in a sample means each has abundance p_1 = p_2 = 0.5. 
+* So the richness is
 ```{r shannon_calculation}
 H = - 2 * (0.5 * log(0.5))
 print(H)
@@ -311,29 +332,36 @@ There are many different diversity indices, but they are often highly correlated
 
 ```{r correlation_diversity_indices}
 plot(shannon, richness, pch=19)
-points(shannon[which(shannon<1 & richness>110)],
-       richness[which(shannon<1 & richness>110)], pch=19, col='red')
-
 ```
 
-I have highlighted one particular sample using `points` to add a red point to the plot. This is a useful example of the `which` function to select values which satisfy a particular set of conditions:  in this case, any sample which has a Shannon index less than 1, but a richness greater than 110. 
+You might notice that some samples have quite low Shannon index but quite high richness (points towards the top-left of the plot). We can  highlighted one particular sample using `points` to add a red point to the plot. This is a useful example of the `which` function to select values which satisfy a particular set of conditions:  in this case, any sample which has a Shannon index less than 1, but a richness greater than 110. 
+
+```{r highlight_point}
+# Find out sample which satisfies this condition
+print(names(shannon[which(shannon<1 & richness>110)]))
+# Use this to highlight it on the plot
+plot(shannon, richness, pch=19)
+points(shannon["ERAS4_D4"],
+       richness["ERAS4_D4"], pch=19, col='red')
+```
 
 <span style="background-color:#EFD31C">
-**Question:** What does a sample having high richness but low Shannon diversity (as indicated by the red point) mean about the distribution of species abundances? How could you look at this in more detail?
+**Question:** What does a sample having high richness but low Shannon diversity (as indicated by the red point) mean about the distribution of mOTU abundances? How could you look at this in more detail?
 </span>
 <details>
   <summary>**Show answer**</summary>
-Many species are present (non-zero abundance), but their abundances are not very evenly distributed - the sample is dominated by a small number of species. We can find out which sample this is:
+
+* Many mOTU are present (non-zero abundance), but their abundances are not very evenly distributed. In other words, the sample is dominated by a small number of mOTUs 
+* We can look at the mOTU abundances in this sample:
 ```{r low_shannon_diversity}
-print(names(shannon[which(shannon<1 & richness>110)]))
 head(sort(mOTUs[,"ERAS4_D4"], decreasing=TRUE))
 ```
-This suggests that in this sample, a single species is present at 84.9%. The next-most abundant is at 3.0% abundance. So we have domination by a single species immediately after antibiotics. 
+* This suggests that in this sample, a single mOTU is present at 84.9%. The next-most abundant is at 3.0% abundance. So we have domination by a single mOTU immediately after antibiotics. 
 ```{r identify_species}
 head(rownames(mOTUs)[order(mOTUs[,"ERAS4_D4"], decreasing=TRUE)])
 ```
-
-'motu_linkage_group_317' suggests it is not a known species from a database, but one identified from metagenomic sequencing alone - it does not have taxonomic identification given by Palleja et al. Later on, Palleja et al. write that 'For better interpretability of results, we removed mOTU linkage groups without taxonomic annotation' - that would include this mOTU, which could be important if present at such high relative abundance. 
+* 'motu_linkage_group_317' suggests it is not a known species from a database, but one identified from metagenomic sequencing alone - it does not have taxonomic identification given by Palleja et al. 
+* N.B. Later on, Palleja et al. write that 'For better interpretability of results, we removed mOTU linkage groups without taxonomic annotation' - that would include this mOTU, which could be important if present at such high relative abundance. 
 </details>
 
 ## Combining the data
@@ -398,14 +426,16 @@ ggplot(mds.df, aes(MDS1, MDS2, colour=day, size=richness))+
 ```
 </details>
 
+## Normalising within patient
+
 Something that Palleja didn't look at was normalising the richness for each sample relative to the baseline value for that patient.  
 
-We can look at this in more detail if we look at the richness - how many species were observed in each patient - over time. 
+We can look at this in more detail if we look at the richness - how many mOTUs were observed in each patient - over time. 
 
 ```{r normalise_richness, fig.height=6, fig.width=12}
 mds.df$richness.norm <- sapply(rownames(mds.df), 
                            function(x) mds.df[x,"richness"] - mds.df[which(mds.df$patient==gsub("_.*", "", x) & mds.df$day=="D0"),"richness"])
-# Don't worry about interpreting the above function too much if it's not clear. Essentially we subtract the D0 richness for each patient from the actual richness of the sample. So D0 is defined to have a richness.norm=0. Negative richness.norm means the patient's gut microbiome on DX has a lower richness than on D0. 
+# Don't worry about the above function too much if it's not clear. Essentially we subtract the D0 richness for each patient from the actual richness of the sample. So D0 is defined to have a richness.norm=0. Negative richness.norm means the patient's gut microbiome on DX has a lower richness than on D0. 
 
 ggplot(mds.df, aes(day, richness.norm, colour=day, group=patient))+
   geom_hline(yintercept = 0, linetype='dashed', size=0.5, colour='grey')+
@@ -436,7 +466,7 @@ doi: [10.1038/s41396-019-0392-1](https://doi.org/10.1038/s41396-019-0392-1)
 
 # Analyzing differential abundances
 
-So far we have largely considered the state of the gut microbiome as a whole i.e. using community measures such as diversity, or ordinations which use all species abundances. While this is good for showing large-scale patterns, much finer resolution analysis is possible.
+So far we have largely considered the state of the gut microbiome as a whole i.e. using community measures such as diversity, or ordinations which use all abundances. While this is good for showing large-scale patterns, much finer resolution analysis is possible.
 
 A short example is shown here, focusing on the *Bifidoabacterium* genus. 
 
@@ -498,7 +528,9 @@ ggplot(mOTUs.long.format[which(mOTUs.long.format$mOTU=="Bifidobacterium bifidum"
 </span>
 <details>
   <summary>**Show answer**</summary>
-The obvious outlier is the sample from D42 from patient ERAS12. This has a *B. bifidum* relative abundance of ~1%, markedly larger than all the others, and *B. bifidum* is not present at all D180. This could be a real pattern or not - the microbiome is very dynamic, but it seems surprising. 
+
+* The obvious outlier is the sample from D42 from patient ERAS12. This has a *B. bifidum* relative abundance of ~1%, markedly larger than all the others, and *B. bifidum* is not present at all D180. 
+* This could be a real pattern or not - the microbiome is very dynamic, but it seems surprising. 
 </details>
 
 We see that *B. bifidum* goes from being present in 4 patients' gut microbiome before treatment to being lower in relative abundance at D4, then apparently 'lost' by D180 in all patients.  
@@ -528,7 +560,10 @@ ggplot(mOTUs.long.format.bifidobacterium, aes(day, value, group=patient, fill=pa
 </span>
 <details>
   <summary>**Show answer**</summary>
-There are **lots** of potential patterns here. One that jumps out at me is *B. dentium*. In ERAS6, ERAS9 and ERAS12 it **increases** in relative abundance after antibiotics by D8. This is surprisingly different from the other *Bifidobacterium* mOTUs. As its name suggests, it is apparently able to colonise the oral cavity as well, perhaps suggesting a different enviromental niche. 
+
+* There are **lots** of potential patterns here. 
+* One that jumps out at me is *B. dentium*. In ERAS6, ERAS9 and ERAS12 it **increases** in relative abundance after antibiotics by D8. This is surprisingly different from the other *Bifidobacterium* mOTUs. 
+* As its name suggests, it is apparently able to colonise the oral cavity as well, perhaps suggesting a different enviromental niche. 
 </details>
 
 These different patterns from shotgun metagenomics could form the basis of future experimental studies. For example, if you were a probiotic manufacturer you might want to market *B. bifidum* yoghurt to give to people post-antibiotic treatment to restore their gut microbiome. A lot more evidence would be required before you could conclude that this was the case though!
@@ -544,7 +579,7 @@ To sum up, we have been able to:
 * Draw our own conclusions about the data
 * Perform exploratory analyses which could suggest further
 
-The commands used should all be quite portable and flexible. If you're interested, I encourage you to try them for yourself with variations. For example: why restrict to the *Bifidobacterium* genus? There are other genera - pick some and use the commands in the last section to look at abundances over time. One thing we did not look at is the abundances of individual *genes*. This is more complex as the number of genes is far larger than the number of species. However, the same principles apply, and Palleja et al. made this data available as well. 
+The commands used should all be quite portable and flexible. If you're interested, I encourage you to try them for yourself with variations. For example: why restrict to the *Bifidobacterium* genus? There are other genera - pick some and use the commands in the last section to look at abundances over time. One thing we did not look at is the abundances of individual *genes*. This is more complex as the number of genes is far larger than the number of mOTUs. However, the same principles apply, and Palleja et al. made this data available as well. 
 
 Finally, some packages we did not look at in this tutorial but are worth mentioning:
 
