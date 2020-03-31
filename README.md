@@ -13,7 +13,7 @@ We will reanalyse a microbiome dataset generated as part of the following study:
 
 **Recovery of gut microbiota of healthy adults following antibiotic exposure**
 Palleja et al. (2018) *Nature Microbiology* 3, 1255-1265
-doi: [s41564-018-0257-9](https://doi.org/s41564-018-0257-9)
+doi: [10.1038/s41564-018-0257-9](https://doi.org/10.1038/s41564-018-0257-9)
 
 The aim of this study was to see how the gut microbiome recovers after a course of antibiotics. Palleja et al. gave twelve healthy male adults a four-day course of three antibiotics: meropenem, gentamicin and vancomycin. This mix was ingested once-daily via apple juice. The particular combination of antibiotics was chosen as '*a modified version of prophylactic antibiotic protocols from intensive care units*'. This would therefore be expected to significantly deplete the gut microbiome. 
 
